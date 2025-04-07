@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crowd Guard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(120deg, #023d96, #4d0885);
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #ffffff;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .stream-wrapper {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stream-container {
+            width: 45%;
+            max-width: 720px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 2px solid #ffffff;
+            text-align: center;
+            position: relative;
+        }
+
+        .stream-container img {
+            width: 100%;
+            border: none;
+            padding: 2px;
+        }
+
+        .button-container {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            background: #66a6ff;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        button:hover {
+            background: #89f7fe;
+            transform: translateY(-3px);
+        }
+
+        button:active {
+            transform: translateY(2px);
+        }
+
+        .selected {
+            background: #ffcc33 !important;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <h1>Crowd Guard</h1>
+    <div class="stream-wrapper">
+        <div class="stream-container">
+            <img id="video-stream1" src="{{ url_for('video_feed', cam_id='cam1') }}" alt="Camera 1 Stream">
+            <div class="button-container">
+                <button id="cam1-btn" onclick="selectCamera('cam1')">Control Camera 1</button>
+            </div>
+        </div>
+        <div class="stream-container">
+            <img id="video-stream2" src="{{ url_for('video_feed', cam_id='cam2') }}" alt="Camera 2 Stream">
+            <div class="button-container">
+                <button id="cam2-btn" onclick="selectCamera('cam2')">Control Camera 2</button>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="rotation-controls">
+        <button onclick="controlServo('right')">Rotate Left</button>
+        <button onclick="controlServo('stop')">Stop</button>
+        <button onclick="controlServo('left')">Rotate Right</button>
+    </div>
+
+    <script>
+        let selectedCamera = 'cam1';
+
+        function selectCamera(camId) {
+            selectedCamera = camId;
+            document.querySelectorAll('.button-container button').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById(`${camId}-btn`).classList.add('selected');
+        }
+
+        function controlServo(direction) {
+            const servoId = selectedCamera === 'cam1' ? 'servo1' : 'servo2';
+            fetch(`/control_servo/${servoId}/${direction}`)
+                .then(response => response.json())
+                .then(data => console.log(data.message))
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
